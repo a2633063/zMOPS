@@ -34,23 +34,3 @@ user_con_received(void *arg, char *pusrdata, unsigned short length) {
 	user_json_analysis(true, pusrdata);
 
 }
-
-void ICACHE_FLASH_ATTR user_send_power(void) {
-	uint8_t i;
-	uint8_t *send_buf = NULL;
-	send_buf = (uint8_t *) os_malloc(256); //
-	if (send_buf != NULL) {
-		os_sprintf(send_buf, "{\"mac\":\"%s\",\"power\":\"%d.%d\",\"voltage\":\"%d\",\"current\":\"%d.%02d\"}", strMac, power / 10, power % 10,
-				voltage, current / 100, current % 100);
-
-		if (!user_mqtt_is_connect()) {
-			user_udp_send(send_buf);
-		} else {
-			user_mqtt_send_senser(send_buf, 0, 0);
-		}
-
-	}
-	if (send_buf)
-		os_free(send_buf);
-
-}

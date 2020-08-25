@@ -6,6 +6,8 @@
 
 #include "smartconfig.h"
 #include "user_wifi.h"
+#include "user_led.h"
+#include "user_key.h"
 
 #include "user_mqtt.h"
 #include "../include/espconn.h"
@@ -204,12 +206,11 @@ void ICACHE_FLASH_ATTR user_wifi_init(void) {
 	i = wifi_station_get_ap_info(config);
 	os_printf("wifi info : %d \n", i);
 
-	if (gpio16_input_get() && i > 0) {
+	if ( GPIO_INPUT_GET(GPIO_ID_PIN(GPIO_KEY_0_IO_NUM)) && i > 0) {
 		user_mqtt_init();
 	} else {	//按住按键开机,为热点模式
 		wifi_status_led_uninstall();
 		user_set_led_wifi(1);
-		user_set_led_logo(1);
 
 		uint32 io_info[][3] = { { GPIO_WIFI_LED_IO_MUX, GPIO_WIFI_LED_IO_FUNC, GPIO_WIFI_LED_IO_NUM } };
 		uint32 pwm_duty_init[1] = { 11111111 };
@@ -259,7 +260,6 @@ void ICACHE_FLASH_ATTR user_smartconfig(void) {
 	smartconfig_start(smartconfig_done);
 	wifi_states = STATE_WIFI_SMARTCONFIG;
 	user_set_led_wifi(1);
-	user_set_led_logo(1);
 
 	wifi_status_led_install(GPIO_WIFI_LED_IO_NUM, GPIO_WIFI_LED_IO_MUX, GPIO_WIFI_LED_IO_FUNC);
 }
@@ -272,7 +272,6 @@ void ICACHE_FLASH_ATTR user_smartconfig_stop(void) {
 		os_printf("smartconfig stop");
 		wifi_status_led_uninstall();
 		user_set_led_wifi(0);
-		user_set_led_logo(0);
 	}
 }
 

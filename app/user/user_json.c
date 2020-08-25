@@ -8,15 +8,12 @@
 #include "user_config.h"
 #include "../cJson/cJSON.h"
 #include "user_wifi.h"
-#include "user_io.h"
 #include "user_update.h"
 #include "user_json.h"
 #include "user_setting.h"
 #include "user_function.h"
 
-
-bool ICACHE_FLASH_ATTR json_plug_analysis(int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend);
-bool ICACHE_FLASH_ATTR json_plug_task_analysis(unsigned char x, unsigned char y, cJSON * pJsonRoot, cJSON * pJsonSend);
+bool ICACHE_FLASH_ATTR json_task_analysis(unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend);
 
 void ICACHE_FLASH_ATTR user_json_analysis(bool udp_flag, u8* jsonRoot) {
 	uint8_t i;
@@ -80,17 +77,6 @@ void ICACHE_FLASH_ATTR user_json_analysis(bool udp_flag, u8* jsonRoot) {
 					cJSON_AddStringToObject(json_send, "ssid", "get wifi_ssid fail");
 				}
 			}
-
-			//设置上报频率
-			cJSON *p_interval = cJSON_GetObjectItem(pJsonRoot, "interval");
-			if (p_interval) {
-				if (cJSON_IsNumber(p_interval) && p_interval->valueint > 0 && p_interval->valueint <= 255) {
-					user_config.interval = p_interval->valueint;
-					update_user_config_flag = true;
-				}
-				cJSON_AddNumberToObject(json_send, "interval", user_config.interval);
-			}
-
 
 			cJSON *p_setting = cJSON_GetObjectItem(pJsonRoot, "setting");
 			if (p_setting) {
@@ -207,23 +193,21 @@ void ICACHE_FLASH_ATTR user_json_analysis(bool udp_flag, u8* jsonRoot) {
 				}
 			}
 
-			//解析plug-----------------------------------------------------------------
-			for (i = 0; i < PLUG_NUM; i++) {
-				if (json_plug_analysis(udp_flag, i, pJsonRoot, json_send)) {
+			//设置on
+			cJSON *p_on = cJSON_GetObjectItem(pJsonRoot, "on");
+			if (p_on && cJSON_IsNumber(p_on)) {
+				update_user_config_flag = true;
+				user_config.on = p_on->valueint;
+			}
+
+			user_relay_set(user_config.on);
+			//解析定时任务-----------------------------------------------------------------
+			for (i = 0; i < PLUG_TIME_TASK_NUM; i++) {
+				if (json_task_analysis(i, pJsonRoot, json_send))
 					update_user_config_flag = true;
-					plug_retained = 1;
-				}
 			}
 
-			cJSON_AddNumberToObject(cJSON_GetObjectItem(json_send, "plug_0"), "on", user_config.plug[0].on);
-			cJSON_AddNumberToObject(cJSON_GetObjectItem(json_send, "plug_1"), "on", user_config.plug[1].on);
-			cJSON_AddNumberToObject(cJSON_GetObjectItem(json_send, "plug_2"), "on", user_config.plug[2].on);
-			cJSON_AddNumberToObject(cJSON_GetObjectItem(json_send, "plug_3"), "on", user_config.plug[3].on);
-
-			if (plug_retained == 1) {
-				user_io_set_plug_all(user_config.plug[0].on, user_config.plug[1].on, user_config.plug[2].on, user_config.plug[3].on);
-			}
-
+			cJSON_AddNumberToObject(json_send, "on", user_config.on);
 			cJSON_AddStringToObject(json_send, "name", user_config.name);
 
 			char *json_str = cJSON_Print(json_send);
@@ -249,86 +233,16 @@ void ICACHE_FLASH_ATTR user_json_analysis(bool udp_flag, u8* jsonRoot) {
 
 /*
  *解析处理定时任务json
- *udp_flag:发送udp/mqtt标志位
- *x:插座编号
- */
-bool ICACHE_FLASH_ATTR
-json_plug_analysis(int udp_flag, unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend) {
-	if (!pJsonRoot)
-		return false;
-	if (!pJsonSend)
-		return false;
-	char i;
-	bool return_flag = false;
-	char plug_str[] = "plug_X";
-	plug_str[5] = x + '0';
-
-	cJSON *p_plug = cJSON_GetObjectItem(pJsonRoot, plug_str);
-	if (!p_plug)
-		return_flag = false;
-
-	cJSON *json_plug_send = cJSON_CreateObject();
-
-	//解析plug on------------------------------------------------------
-	if (p_plug) {
-		cJSON *p_plug_on = cJSON_GetObjectItem(p_plug, "on");
-		if (p_plug_on) {
-			if (cJSON_IsNumber(p_plug_on)) {
-				user_config.plug[x].on = !!(p_plug_on->valueint);
-				//user_io_set_plug(x, p_plug_on->valueint);
-				return_flag = true;
-				if (x > 0 && user_config.plug[x].on == 1) {	//当打开分开关时,自动打开总开关
-					user_config.plug[0].on = 1;
-				} else if (x == 0 && user_config.plug[x].on == 0) {	//当关闭总开关时,关闭所有开关
-					user_config.plug[1].on = 0;
-					user_config.plug[2].on = 0;
-					user_config.plug[3].on = 0;
-				}
-			}
-		}
-
-		//解析plug中setting项目----------------------------------------------
-		cJSON *p_plug_setting = cJSON_GetObjectItem(p_plug, "setting");
-		if (p_plug_setting) {
-			cJSON *json_plug_setting_send = cJSON_CreateObject();
-			//解析plug中setting中name----------------------------------------
-			cJSON *p_plug_setting_name = cJSON_GetObjectItem(p_plug_setting, "name");
-			if (p_plug_setting_name) {
-				if (cJSON_IsString(p_plug_setting_name)) {
-					return_flag = true;
-					os_sprintf(user_config.plug[x].name, p_plug_setting_name->valuestring);
-				}
-				cJSON_AddStringToObject(json_plug_setting_send, "name", user_config.plug[x].name);
-			}
-
-			//解析plug中setting中task----------------------------------------
-			for (i = 0; i < PLUG_TIME_TASK_NUM; i++) {
-				if (json_plug_task_analysis(x, i, p_plug_setting, json_plug_setting_send))
-					return_flag = true;
-			}
-
-			cJSON_AddItemToObject(json_plug_send, "setting", json_plug_setting_send);
-		}
-	}
-
-//	cJSON_AddNumberToObject(json_plug_send, "on", user_config.plug[x].on);
-
-	cJSON_AddItemToObject(pJsonSend, plug_str, json_plug_send);
-	return return_flag;
-}
-
-/*
- *解析处理定时任务json
  *x:插座编号 y:任务编号
  */
 bool ICACHE_FLASH_ATTR
-json_plug_task_analysis(unsigned char x, unsigned char y, cJSON * pJsonRoot, cJSON * pJsonSend) {
+json_task_analysis(unsigned char x, cJSON * pJsonRoot, cJSON * pJsonSend) {
 	if (!pJsonRoot)
 		return false;
 	bool return_flag = false;
 
 	char plug_task_str[] = "task_X";
-	plug_task_str[5] = y + '0';
+	plug_task_str[5] = x + '0';
 
 	cJSON *p_plug_task = cJSON_GetObjectItem(pJsonRoot, plug_task_str);
 	if (!p_plug_task)
@@ -347,19 +261,19 @@ json_plug_task_analysis(unsigned char x, unsigned char y, cJSON * pJsonRoot, cJS
 		if (cJSON_IsNumber(p_plug_task_hour) && cJSON_IsNumber(p_plug_task_minute) && cJSON_IsNumber(p_plug_task_repeat)
 				&& cJSON_IsNumber(p_plug_task_action) && cJSON_IsNumber(p_plug_task_on)) {
 			return_flag = true;
-			user_config.plug[x].task[y].hour = p_plug_task_hour->valueint;
-			user_config.plug[x].task[y].minute = p_plug_task_minute->valueint;
-			user_config.plug[x].task[y].repeat = p_plug_task_repeat->valueint;
-			user_config.plug[x].task[y].action = p_plug_task_action->valueint;
-			user_config.plug[x].task[y].on = p_plug_task_on->valueint;
+			user_config.task[x].hour = p_plug_task_hour->valueint;
+			user_config.task[x].minute = p_plug_task_minute->valueint;
+			user_config.task[x].repeat = p_plug_task_repeat->valueint;
+			user_config.task[x].action = p_plug_task_action->valueint;
+			user_config.task[x].on = p_plug_task_on->valueint;
 		}
 
 	}
-	cJSON_AddNumberToObject(json_plug_task_send, "hour", user_config.plug[x].task[y].hour);
-	cJSON_AddNumberToObject(json_plug_task_send, "minute", user_config.plug[x].task[y].minute);
-	cJSON_AddNumberToObject(json_plug_task_send, "repeat", user_config.plug[x].task[y].repeat);
-	cJSON_AddNumberToObject(json_plug_task_send, "action", user_config.plug[x].task[y].action);
-	cJSON_AddNumberToObject(json_plug_task_send, "on", user_config.plug[x].task[y].on);
+	cJSON_AddNumberToObject(json_plug_task_send, "hour", user_config.task[x].hour);
+	cJSON_AddNumberToObject(json_plug_task_send, "minute", user_config.task[x].minute);
+	cJSON_AddNumberToObject(json_plug_task_send, "repeat", user_config.task[x].repeat);
+	cJSON_AddNumberToObject(json_plug_task_send, "action", user_config.task[x].action);
+	cJSON_AddNumberToObject(json_plug_task_send, "on", user_config.task[x].on);
 
 	cJSON_AddItemToObject(pJsonSend, plug_task_str, json_plug_task_send);
 	return return_flag;

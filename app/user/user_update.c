@@ -71,10 +71,8 @@ void ICACHE_FLASH_ATTR ota_start_Upgrade(const char *name,const char *server_ip)
 		os_free(update->pespconn);
 		os_free(update->url);
 		os_free(update);
-		user_set_led_logo(1);
 	} else {
 		os_printf("[OTA]Upgrading...\n");
-		user_set_led_logo(0);
 	}
 }
 
@@ -93,7 +91,6 @@ user_ota_dns_found(const char *name, ip_addr_t *ipaddr, void *arg) {
 		}
 
 		ota_start_Upgrade(name, (char *) &ipaddr->addr);
-		user_set_led_logo(0);
 	} else {
 		os_printf("user_esp_platform_dns_found fail\n");
 	}

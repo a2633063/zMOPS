@@ -22,7 +22,6 @@ user_setting_init(void) {
 	user_setting_get_config();
 
 	os_printf("Device name:\"%s\"\r\n", user_config.name);
-	os_printf("interval:%d\r\n", user_config.interval);
 	os_printf("MQTT Service ip:\"%s:%d\"\r\n", user_config.mqtt_ip, user_config.mqtt_port);
 	os_printf("MQTT Service user:\"%s\"\r\n", user_config.mqtt_user);
 	os_printf("MQTT Service password:\"%s\"\r\n", user_config.mqtt_password);
@@ -70,11 +69,6 @@ user_setting_get_config(void) {
 	os_memcpy(&user_config, p, length);
 	os_free(p);
 
-	if (user_config.version == 4 && USER_CONFIG_VERSION == 5) {
-		user_config.version = USER_CONFIG_VERSION;
-		user_config.interval = 5;
-	}
-
 //	os_printf("user_config.name[0]:0x%02x 0x%02x 0x%02x\r\n", user_config.name[0],user_config.name[1],user_config.name[2]);
 	if (user_config.name[0] == 0xff && user_config.name[1] == 0xff && user_config.name[2] == 0xff || user_config.version != USER_CONFIG_VERSION) {
 
@@ -84,30 +78,18 @@ user_setting_get_config(void) {
 		os_sprintf(user_config.mqtt_user, "");
 		os_sprintf(user_config.mqtt_password, "");
 		user_config.mqtt_port = 1883;
-		user_config.interval = 5;
 		user_config.version = USER_CONFIG_VERSION;
-		for (i = 0; i < PLUG_NUM; i++) {
-			user_config.plug[i].on = 1;
 
-			//插座名称 插口1-4
-			user_config.plug[i].name[0] = 0xe6;
-			user_config.plug[i].name[1] = 0x8f;
-			user_config.plug[i].name[2] = 0x92;
-			user_config.plug[i].name[3] = 0xe5;
-			user_config.plug[i].name[4] = 0x8f;
-			user_config.plug[i].name[5] = 0xa3;
-			user_config.plug[i].name[6] = i + '0';
-			user_config.plug[i].name[7] = 0;
+			user_config.on = 1;
 
-			//sprintf( user_config.plug[i].name, "插座%d", i );//需要使用utf8编码
 			for (j = 0; j < PLUG_TIME_TASK_NUM; j++) {
-				user_config.plug[i].task[j].hour = 0;
-				user_config.plug[i].task[j].minute = 0;
-				user_config.plug[i].task[j].repeat = 0x00;
-				user_config.plug[i].task[j].on = 0;
-				user_config.plug[i].task[j].action = 1;
+				user_config.task[j].hour = 0;
+				user_config.task[j].minute = 0;
+				user_config.task[j].repeat = 0x00;
+				user_config.task[j].on = 0;
+				user_config.task[j].action = 1;
 			}
-		}
+
 		user_setting_set_config();
 	}
 }
