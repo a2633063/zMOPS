@@ -72,7 +72,7 @@ void wifi_handle_event_cb(System_Event_t *evt) {
 		os_printf("\n");
 		os_sprintf(strIP, IPSTR, IP2STR(&evt->event_info.got_ip.ip));
 		wifi_status_led_uninstall();
-		user_set_led_wifi(1);
+		user_set_led_wifi(user_config.on);
 		user_mqtt_connect();	//连接MQTT服务器
 		break;
 	case EVENT_SOFTAPMODE_STACONNECTED:

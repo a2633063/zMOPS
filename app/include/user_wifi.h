@@ -16,9 +16,9 @@ typedef enum {
 
 } wifi_state_t;
 
-#define GPIO_WIFI_LED_IO_MUX     PERIPHS_IO_MUX_GPIO0_U
-#define GPIO_WIFI_LED_IO_NUM     0
-#define GPIO_WIFI_LED_IO_FUNC    FUNC_GPIO0
+#define GPIO_WIFI_LED_IO_MUX     PERIPHS_IO_MUX_MTDI_U
+#define GPIO_WIFI_LED_IO_NUM     12
+#define GPIO_WIFI_LED_IO_FUNC    FUNC_GPIO12
 
 extern char hwaddr[6];
 extern char strMac[16];

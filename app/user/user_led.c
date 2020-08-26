@@ -12,7 +12,7 @@ user_led_init(void) {
 	//PIN_PULLUP_EN(PERIPHS_IO_MUX_GPIO0_U);
 	PIN_FUNC_SELECT(GPIO_LED_WIFI_IO_MUX, GPIO_LED_WIFI_IO_FUNC);
 
-	user_set_led_wifi(0);
+	user_set_led_wifi(1);
 }
 
 

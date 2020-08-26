@@ -13,7 +13,7 @@
 
 extern const unsigned char wififail[0xAC9];
 
-extern const unsigned char wifisetting[3372];
+extern const unsigned char wifisetting[3373];
 
 extern const unsigned char wifisuccess[0x9BC];
 
