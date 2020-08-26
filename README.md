@@ -1,11 +1,9 @@
-# zDC1
-**斐讯DC1智能排插个人固件.**
+# zMOPS
+**MOPS智能插座个人固件.**
 
-排插DC1因为服务器关闭,无法使用.
+开发供自己使用的FW及对应app,确保自己能够正常使用此排插.取名为zMOPS.
 
-为此,开发供自己使用的FW及对应app,确保自己能够正常使用此排插.取名为zDC1.
-
-
+<img src="https://cdn.jsdelivr.net/gh/a2633063/Image/zMOPS/image-20200826122334753.png" alt="image-20200826122334753" style="zoom: 40%;" />
 
 建立了个QQ群,有问题可以加入来讨论:**459996006**  [点这里直接加群](//shang.qq.com/wpa/qunwpa?idkey=9104eabd6131d856b527ad89636fc603eb745a5d047e8b45d183165c8e607e59)  (收费群,请用android或pc入群. 支持我请加群或通过app端打赏我)(如果提示禁止入群,可能为付费群的一些问题,可以晚点再试)
 
@@ -15,7 +13,7 @@
 
 > ### 作者声明
 >
-> 注意: 本项目主要目的为作者本人自己学习及使用DC1排插而开发,本着开源精神及造福网友而开源,仅个人开发,可能无法做到完整的测试,所以不承担他人使用本项目照成的所有后果.
+> 注意: 本项目主要目的为作者本人自己学习及使用MOPS智能插座而开发,本着开源精神及造福网友而开源,仅个人开发,可能无法做到完整的测试,所以不承担他人使用本项目照成的所有后果.
 >
 > **严禁他人将本项目用户用于任何商业活动.个人在非盈利情况下可以自己使用,严禁收费代刷等任何盈利服务.**
 > 
@@ -25,27 +23,25 @@
 
 
 
-# 重大更新!
-
-代码已经开源,不需要激活,刷机即可直接使用.
-
-相对于旧版本,更新了通信协议等大量内容.
-
-
-
 ## 特性
 
-本固件使用斐讯DC1排插硬件为基础,实现以下功能:
+本固件使用MOPS插座硬件为基础,实现以下功能:
 
-- [x] 4个USB充电
-- [x] 按键控制所有插口通断
-- [x] 控制每个接口独立开关
-- [x] 每个接口拥有独立的5组定时开关
+- [x] 按键插座通断
+
+- [x] 5组定时开关
+
 - [x] ota在线升级
+
 - [x] 无服务器时使用UDP通信
+
 - [x] MQTT服务器连接控制
-- [x] 通过mqtt连入homeassistant
-- [x] app实时显示功率/电压/电流(不做任何精度保证)
+
+- [x] web配网
+
+- [ ] 通过mqtt连入homeassistant(暂未完成配置文件)
+
+  
 
   
 
@@ -69,7 +65,7 @@
 
 ​	[FAQ](#FAQ)
 
-[文档更新日志](#文档更新日志)
+
 
 
 
@@ -79,13 +75,12 @@
 - 烧录固件需要烧录器:一般的ttl串口烧录器即可,一般刷机的人应该都有,淘宝价格大概为2-5元
 - 使用此固件,需要app端配合,见[SmartControl_Android_MQTT](https://github.com/a2633063/SmartControl_Android_MQTT).
 - app只有android,因ios限制,本人不考虑免费做ios开发.(不要再问是否有ios端).
-- 有人测试从esphome可以直接ota到我的固件,本人未做测试,需要的可以试试看:[从esphome升级到zdc1固件](https://github.com/a2633063/zDC1/wiki/固件烧录#从esphome升级到zdc1固件)
 
 > 虽然没有ios端,但固件支持homeassistant,可以使用安卓APP配置完成后,连入homeassistant后,使用ios控制. APP主要仅为第一次使用配对网络及配置mqtt服务器时使用,之后可以用homeassistant控制不再使用app.
 
 > 如果你不知道什么是mqtt或homeassistant,所有有关的内容可以跳过.
 
-> 如果你有任何问题,可以直接在此项目中提交issue,或给我发送邮件:zip_zhang@foxmail.com,邮件标题中请注明[zDC1].
+> 如果你有任何问题,可以直接在此项目中提交issue,或给我发送邮件:zip_zhang@foxmail.com,邮件标题中请注明[zMOPS].
 >
 > 
 
@@ -95,7 +90,7 @@
 
 ## 开始
 
-整体流程如下:拆开DC1,将固件/烧录器/pc互相连接,在pc运行烧录软件进行烧录,烧录固件.
+整体流程如下:拆开MOPS插座,将固件/烧录器/pc互相连接,在pc运行烧录软件进行烧录,烧录固件.
 
 烧录完成后,首次使用前配对网络并配置mqtt服务器,之后就可以使用了.
 
@@ -103,7 +98,7 @@
 
 ## 拆机接线及烧录固件相关
 
-见[固件烧录](https://github.com/a2633063/zDC1/wiki/固件烧录)
+见[固件烧录](https://github.com/a2633063/zMOPS/wiki/固件烧录)
 
 烧录固件完成后,即可开始使用
 
@@ -111,13 +106,13 @@
 
 ## 开始使用/使用方法
 
-见[开始使用](https://github.com/a2633063/zDC1/wiki/开始使用)
+见[开始使用](https://github.com/a2633063/zMOPS/wiki/开始使用)
 
 
 
 ## 接入home assistant
 
-见[homeassistant接入](https://github.com/a2633063/zDC1/wiki/homeassistant接入)
+见[homeassistant接入](https://github.com/a2633063/zMOPS/wiki/homeassistant接入)
 
 
 
@@ -133,7 +128,7 @@
 
 所有通信协议开源,你可以自己开发控制app或ios端
 
-见[通信协议](https://github.com/a2633063/zDC1/wiki/通信协议)
+见[通信协议](https://github.com/a2633063/zMOPS/wiki/通信协议)
 
 
 
@@ -142,9 +137,3 @@
 见 [FAQ](https://github.com/a2633063/SmartControl_Android_MQTT/wiki/FAQ)
 
 
-
-### 文档更新日志
-
-**20191224**
-
-增加FAQ跳转链接
