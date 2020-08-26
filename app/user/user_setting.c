@@ -85,7 +85,7 @@ user_setting_get_config(void) {
 			for (j = 0; j < PLUG_TIME_TASK_NUM; j++) {
 				user_config.task[j].hour = 0;
 				user_config.task[j].minute = 0;
-				user_config.task[j].repeat = 0x00;
+				user_config.task[j].repeat = 127;
 				user_config.task[j].on = 0;
 				user_config.task[j].action = 1;
 			}
