@@ -3,7 +3,7 @@
 
 #include "os_type.h"
 
-#define VERSION "v0.0.1"
+#define VERSION "v0.0.2"
 
 #define TYPE 7
 #define TYPE_NAME "zMOPS"

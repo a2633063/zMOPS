@@ -21,7 +21,7 @@ LOCAL unsigned char key_press_flag = 0;	//°´¼ü³¤°´±êÖ¾Î»,·ÀÖ¹°´¼ü³¤°´ºóËÉ¿ªÊ±Ö´Ð
 void ICACHE_FLASH_ATTR
 user_relay_set( char level) {
 	if (level != -1) {
-		GPIO_OUTPUT_SET(GPIO_ID_PIN(GPIO_RELAY_IO_NUM), !level);
+		GPIO_OUTPUT_SET(GPIO_ID_PIN(GPIO_RELAY_IO_NUM), level);
 	} else {
 		GPIO_OUTPUT_SET(GPIO_ID_PIN(GPIO_RELAY_IO_NUM), !GPIO_INPUT_GET(GPIO_ID_PIN(GPIO_RELAY_IO_NUM)));
 	}
