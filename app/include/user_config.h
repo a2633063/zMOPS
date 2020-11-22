@@ -3,7 +3,7 @@
 
 #include "os_type.h"
 
-#define VERSION "v0.0.2"
+#define VERSION "v0.1.0"
 
 #define TYPE 7
 #define TYPE_NAME "zMOPS"
@@ -26,8 +26,6 @@ typedef struct {
 	int8_t on;    //开关
 } user_plug_task_config_t;
 
-
-
 //用户保存参数结构体
 typedef struct {
 	char version;
@@ -44,6 +42,7 @@ typedef struct {
 
 extern char rtc_init;
 extern user_config_t user_config;
-
+extern uint8_t child_lock;
+extern uint8_t led_lock;
 #endif
 

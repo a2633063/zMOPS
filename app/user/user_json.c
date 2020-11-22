@@ -77,7 +77,28 @@ void ICACHE_FLASH_ATTR user_json_analysis(bool udp_flag, u8* jsonRoot) {
 					cJSON_AddStringToObject(json_send, "ssid", "get wifi_ssid fail");
 				}
 			}
+	        //解析童锁
+	        cJSON *p_child_lock = cJSON_GetObjectItem( pJsonRoot, "child_lock" );
+	        if ( p_child_lock )
+	        {
+	            if ( cJSON_IsNumber( p_child_lock ) && (p_child_lock->valueint == 1 || p_child_lock->valueint == 0) )
+	            {
+	                child_lock = p_child_lock->valueint;
+	            }
+	            cJSON_AddNumberToObject( json_send, "child_lock", child_lock );
+	        }
 
+	        //解析led锁
+	        cJSON *p_led_lock = cJSON_GetObjectItem( pJsonRoot, "led_lock" );
+	        if ( p_led_lock )
+	        {
+	            if ( cJSON_IsNumber( p_led_lock ) && (p_led_lock->valueint == 1 || p_led_lock->valueint == 0) )
+	            {
+	                led_lock = p_led_lock->valueint;
+	                user_relay_set(user_config.on);
+	            }
+	            cJSON_AddNumberToObject( json_send, "led_lock", led_lock );
+	        }
 			cJSON *p_setting = cJSON_GetObjectItem(pJsonRoot, "setting");
 			if (p_setting) {
 
@@ -96,6 +117,7 @@ void ICACHE_FLASH_ATTR user_json_analysis(bool udp_flag, u8* jsonRoot) {
 							user_ota_start(p_ota2->valuestring);
 					}
 				}
+
 
 				//设置设备名称
 				cJSON *p_setting_name = cJSON_GetObjectItem(p_setting, "name");
@@ -148,6 +170,11 @@ void ICACHE_FLASH_ATTR user_json_analysis(bool udp_flag, u8* jsonRoot) {
 
 				//开始返回数据
 				cJSON *json_setting_send = cJSON_CreateObject();
+				//获取设备固件信息
+				cJSON *p_setting_userbin = cJSON_GetObjectItem(p_setting, "userbin");
+				if (p_setting_userbin) {
+					cJSON_AddNumberToObject(json_setting_send, "userbin", system_upgrade_userbin_check()+1);
+				}
 				//返回设备ota
 				if (p_ota1)
 					cJSON_AddStringToObject(json_setting_send, "ota1", p_ota1->valuestring);

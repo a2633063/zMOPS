@@ -19,6 +19,10 @@ user_led_init(void) {
 
 void ICACHE_FLASH_ATTR
 user_set_led_wifi(int8_t level) {
+	if(led_lock==1)
+	{
+		level=0;
+	}
 	if (level != -1) {
 		GPIO_OUTPUT_SET(GPIO_ID_PIN(GPIO_LED_WIFI_IO_NUM), !level);
 	} else {

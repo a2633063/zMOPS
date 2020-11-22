@@ -16,6 +16,8 @@
 
 #include "user_webserver.h"
 
+uint8_t child_lock = 0;
+uint8_t led_lock = 0;
 user_config_t user_config;
 
 
