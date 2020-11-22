@@ -99,7 +99,7 @@ LOCAL void key_intr_handler(void *arg) {
 void ICACHE_FLASH_ATTR
 user_key_init(void) {
 
-//	PIN_FUNC_SELECT(GPIO_RELAY_IO_MUX, GPIO_RELAY_IO_FUNC);
+	PIN_FUNC_SELECT(GPIO_RELAY_IO_MUX, GPIO_RELAY_IO_FUNC);
 //	single_key[0] = key_init_single(GPIO_KEY_0_IO_NUM, GPIO_KEY_0_IO_MUX,
 //	GPIO_KEY_0_IO_FUNC, user_key_long_press, user_key_short_press);
 //
