@@ -27,20 +27,17 @@ char topic_set[MAX_MQTT_TOPIC_SIZE];
 char topic_senser[MAX_MQTT_TOPIC_SIZE];
 char willtopic[MAX_MQTT_TOPIC_SIZE];
 
+#define MQTT_TIMER_REPEATTIME 500
 LOCAL os_timer_t timer_mqtt;
-LOCAL uint8_t status = 0;
+LOCAL uint16_t status = 0;
 void ICACHE_FLASH_ATTR user_mqtt_timer_func(void *arg) {
-
 	status++;
-	switch (status) {
-	case 1:
-		user_mqtt_send_topic(willtopic,"1\0",1,1);
-		break;
-
-	default:
+	if (status == 1) {
+		user_mqtt_send_topic(willtopic, "1\0", 1, 1);
+	} else if (status >= 5 + MQTT_KEEPALIVE * (1000 / MQTT_TIMER_REPEATTIME)) {
+		user_mqtt_send_topic(willtopic, "1\0", 1, 1);
 		os_timer_disarm(&timer_mqtt);
 		status = 0;
-		break;
 	}
 }
 
@@ -53,7 +50,7 @@ void mqttConnectedCb(uint32_t *args) {
 
 	os_timer_disarm(&timer_mqtt);
 	os_timer_setfn(&timer_mqtt, (os_timer_func_t *) user_mqtt_timer_func, NULL);
-	os_timer_arm(&timer_mqtt, 80, 1);
+	os_timer_arm(&timer_mqtt, MQTT_TIMER_REPEATTIME, 1);
 
 }
 
@@ -117,7 +114,7 @@ void ICACHE_FLASH_ATTR user_mqtt_init(void) {
 //MQTT≥ı ºªØ
 	MQTT_InitConnection(&mqttClient, user_config.mqtt_ip, user_config.mqtt_port, NO_TLS);
 
-	MQTT_InitClient(&mqttClient, user_config.name, user_config.mqtt_user, user_config.mqtt_password, MQTT_KEEPALIVE, 1);
+	MQTT_InitClient(&mqttClient, strMac, user_config.mqtt_user, user_config.mqtt_password, MQTT_KEEPALIVE, 1);
 
 	MQTT_InitLWT(&mqttClient, willtopic, "0", 1, 1);
 	MQTT_OnConnected(&mqttClient, mqttConnectedCb);
